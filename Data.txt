@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#searchBtn").click(function () {
+
+                var roll_no = $("#stud_id").val();
+
+                window.location = `/GetData.html?roll_no=${roll_no}`
+
+                //$.ajax({
+                //    url: 'WebService1.asmx/GetStudent',
+                //    data: { Roll_no: roll_no },
+                //    method: "post",
+                //    dataType: 'xml',
+                //    success: function (data) {
+
+                //        //var xmlData = $(data);
+                //        //$("#stu_roll").val(xmlData.find('Roll_no').text());
+                //        //$("#Name").val(xmlData.find('Name').text());
+                //        //$("#Course").val(xmlData.find('Course').text());
+                //        //$("#Branch").val(xmlData.find('Branch').text());
+                //        //$("#Batch").val(xmlData.find('Batch').text());
+                //    },
+                //    error: function (err) {
+                //        alert(err.responseText);
+                //    }
+                //});
+            });
+        });
+
+
+    </script>
+</head>
+<body>
+
+    <div class="main_container">
+        <input id="stud_id" type="text" />
+        <input id="searchBtn" type="button" value="button" />
+    </div>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
+
+
+*******************************************************
+
+
+(GET DATA)
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+            var roll_no = new URLSearchParams(window.location.search).get('roll_no')
+
+            var getData = $("#stud_id").val();
+            //var url = 'https://localhost:44377/index.html';
+            //var getd = window.location.href.slice = url;
+
+            $.ajax({
+                url: 'WebService1.asmx/GetStudent',
+                data: { Roll_no: roll_no },
+                method: "post",
+                dataType: 'xml',
+                success: function (data) {
+                    var xmlData = $(data);
+                    $("#stu_roll").val(xmlData.find('Roll_no').text());
+                    $("#Name").val(xmlData.find('Name').text());
+                    $("#Course").val(xmlData.find('Course').text());
+                    $("#Branch").val(xmlData.find('Branch').text());
+                    $("#Batch").val(xmlData.find('Batch').text());
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                }
+            });
+
+        });
+
+
+    </script>
+
+
+
+</head>
+<body>
+    <div class="result">
+        <input id="stu_roll" type="text" />
+        <input id="Name" type="text" />
+        <input id="Course" type="text" />
+        <input id="Branch" type="text" />
+        <input id="Batch" type="text" />
+    </div>
+
+</body>
+</html>
+
+*********************************************************
+
+(web service)
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Services;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+namespace WebApplication19
+{
+    /// <summary>
+    /// Summary description for WebService1
+    /// </summary>
+    [WebService(Namespace = "http://tempuri.org/")]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+    [System.ComponentModel.ToolboxItem(false)]
+    // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line. 
+    [System.Web.Script.Services.ScriptService]
+    public class WebService1 : System.Web.Services.WebService
+    {
+
+        [WebMethod]
+        public Student GetStudent(string Roll_no)
+        {
+            Student stu = new Student();
+
+            string cs = ConfigurationManager.ConnectionStrings["connection"].ConnectionString;
+            SqlConnection con = new SqlConnection(cs);
+            SqlCommand cmd = new SqlCommand("getData", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter parameter = new SqlParameter();
+            parameter.ParameterName = "@Roll_no";
+            parameter.Value = Roll_no;
+            cmd.Parameters.Add(parameter);
+            con.Open();
+            SqlDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                stu.Roll_no = rdr["Roll_no"].ToString();
+                stu.Name = rdr["Name"].ToString();
+                stu.Course = rdr["Course"].ToString();
+                stu.Branch = rdr["Branch"].ToString();
+                stu.Batch = rdr["Batch"].ToString();
+            }
+            return stu;
+
+
+        }
+
+    }
+}
+ 
+
+ 
